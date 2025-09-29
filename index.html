@@ -39,13 +39,6 @@
       const password = document.getElementById("password").value.trim();
       const mensaje = document.getElementById("mensaje");
 
-      if (password !== "1234") {
-        mensaje.innerText = "Credenciales no válidas";
-        document.getElementById("codigo").value = "";
-        document.getElementById("password").value = "";
-        return;
-      }
-
       try {
         const response = await fetch("https://24a0dac0-2579-4138-985c-bec2df4bdfcc-00-3unzo70c406dl.riker.replit.dev/login", {
           method: "POST",
@@ -53,14 +46,22 @@
           body: JSON.stringify({ codigo, clave: password })
         });
 
-        if (!response.ok) throw new Error("Error en la petición");
-
         const usuario = await response.json();
-        localStorage.setItem("usuario", JSON.stringify(usuario));
 
-        window.location.href = "notas.html"; // si login válido
+        // Validar respuesta del backend
+        if (!response.ok || !usuario.login) {
+          mensaje.innerText = "Credenciales no válidas";
+          document.getElementById("codigo").value = "";
+          document.getElementById("password").value = "";
+          return;
+        }
+
+        // Guardar usuario en localStorage
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+        window.location.href = "notas.html"; // redirigir si login válido
+
       } catch (error) {
-        mensaje.innerText = "Credenciales no válidas";
+        mensaje.innerText = "Error al conectar con el servidor";
         document.getElementById("codigo").value = "";
         document.getElementById("password").value = "";
       }
